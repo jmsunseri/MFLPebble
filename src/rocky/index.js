@@ -8,11 +8,13 @@ var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 var mfl = null;
 
-
+rocky.postMessage({command: 'settings'});
 
 
 
 rocky.on('draw', function(drawEvent) {
+	
+	
   var ctx = drawEvent.context;
   var w = ctx.canvas.unobstructedWidth;
   var h = ctx.canvas.unobstructedHeight;
@@ -59,8 +61,6 @@ rocky.on('draw', function(drawEvent) {
 			mflText += 'L:' + mfl[result].league + ' S:' + mfl[result].score + ' R:' + mfl[result].rank + '\n';
 		}
 		
-		
-		console.log(mflText);
     ctx.font = '18px bold Gothic';
     ctx.textAlign = 'left';
     ctx.fillText(mflText, 10, 90 - obstruction_h);
@@ -69,8 +69,13 @@ rocky.on('draw', function(drawEvent) {
 });
 
 rocky.on('message', function(event) {
- 	mfl = event.data;
-	rocky.requestDraw();
+	if(event.data.command === 'mfl') {
+    mfl = event.data;
+		rocky.requestDraw();
+  }
+	if(event.data.command === 'settings') {
+    rocky.postMessage({command: 'mfl'});
+  }
 });
 
 rocky.on('secondchange', function(e) {

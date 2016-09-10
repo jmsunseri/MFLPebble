@@ -1,30 +1,36 @@
 module.exports = [
   {
     "type": "heading",
-    "defaultValue": "Watchface Configuration"
+    "defaultValue": "MFL Configuration"
   },
   {
     "type": "text",
-    "defaultValue": "Clay with Rocky.js"
+    "defaultValue": "Please enter your league number and your franchise id in that league"
   },
   {
     "type": "section",
     "items": [
       {
         "type": "heading",
-        "defaultValue": "Colors"
+        "defaultValue": "League 1"
       },
       {
-        "type": "color",
-        "messageKey": "BackgroundColor",
-        "defaultValue": "0x000000",
-        "label": "Background Color"
+        "type": "input",
+        "messageKey": "LeagueOneNumber",
+        "defaultValue": "",
+        "label": "League #",
+				"attributes": {
+					"placeholder": "11902"
+				}
       },
       {
-        "type": "color",
-        "messageKey": "ForegroundColor",
-        "defaultValue": "0xFFFFFF",
-        "label": "Foreground Color"
+        "type": "input",
+        "messageKey": "LeagueOneFranchiseNumber",
+        "defaultValue": "",
+        "label": "Franchise Id",
+				"attributes": {
+					"placeholder": "0008"
+				}
       }
     ]
   },
@@ -33,13 +39,104 @@ module.exports = [
     "items": [
       {
         "type": "heading",
-        "defaultValue": "More Settings"
+        "defaultValue": "League 2"
       },
       {
-        "type": "toggle",
-        "messageKey": "Blink",
-        "label": "Enable Blinking",
-        "defaultValue": true
+        "type": "input",
+        "messageKey": "LeagueTwoNumber",
+        "label": "League #",
+				"attributes": {
+					"placeholder": "11902"
+				}
+      },
+      {
+        "type": "input",
+        "messageKey": "LeagueTwoFranchiseNumber",
+        "label": "Franchise Id",
+				"attributes": {
+					"placeholder": "0008"
+				}
+      }
+    ]
+  },
+	{
+    "type": "section",
+    "items": [
+      {
+        "type": "heading",
+        "defaultValue": "League 3"
+      },
+      {
+        "type": "input",
+        "messageKey": "LeagueThreeNumber",
+        "defaultValue": "",
+        "label": "League #",
+				"attributes": {
+					"placeholder": "11902"
+				}
+      },
+      {
+        "type": "input",
+        "messageKey": "LeagueThreeFranchiseNumber",
+        "defaultValue": "",
+        "label": "Franchise Id",
+				"attributes": {
+					"placeholder": "0008"
+				}
+      }
+    ]
+  },
+	{
+    "type": "section",
+    "items": [
+      {
+        "type": "heading",
+        "defaultValue": "League 4"
+      },
+      {
+        "type": "input",
+        "messageKey": "LeagueFourNumber",
+        "defaultValue": "",
+        "label": "League #",
+				"attributes": {
+					"placeholder": "11902"
+				}
+      },
+      {
+        "type": "input",
+        "messageKey": "LeagueFourFranchiseNumber",
+        "defaultValue": "",
+        "label": "Franchise Id",
+				"attributes": {
+					"placeholder": "0008"
+				}
+      }
+    ]
+  },
+	{
+    "type": "section",
+    "items": [
+      {
+        "type": "heading",
+        "defaultValue": "League 5"
+      },
+      {
+        "type": "input",
+        "messageKey": "LeagueFiveNumber",
+        "defaultValue": "",
+        "label": "League #",
+				"attributes": {
+					"placeholder": "11902"
+				}
+      },
+      {
+        "type": "input",
+        "messageKey": "LeagueFiveFranchiseNumber",
+        "defaultValue": "",
+        "label": "Franchise Id",
+				"attributes": {
+					"placeholder": "0008"
+				}
       }
     ]
   },
