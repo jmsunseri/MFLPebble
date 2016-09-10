@@ -4,6 +4,9 @@
     "keywords": [],
     "name": "mfl-watch",
     "pebble": {
+        "capabilities": [
+            "configurable"
+        ],
         "displayName": "MFL Watch",
         "enableMultiJS": true,
         "messageKeys": [],
