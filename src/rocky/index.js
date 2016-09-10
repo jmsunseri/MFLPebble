@@ -23,7 +23,14 @@ rocky.on('draw', function(drawEvent) {
   ctx.fillStyle = 'white';
 
   // TIME
-  var clockTime = leftpad(d.getHours(), 2, 0) + ':' + 
+	
+	var hours = d.getHours();
+	if(hours > 12)
+		hours -= 12;
+	else if(hours === 0)
+		hours = 12;
+	
+  var clockTime = leftpad(hours, 2, 0) + ':' + 
                     leftpad(d.getMinutes(), 2, 0); // TODO: Detect 24h
   ctx.font = '42px bold numbers Leco-numbers';
   ctx.textAlign = 'center';
@@ -55,8 +62,8 @@ rocky.on('draw', function(drawEvent) {
 		
 		console.log(mflText);
     ctx.font = '18px bold Gothic';
-    ctx.textAlign = 'center';
-    ctx.fillText(mflText, w / 2, 90 - obstruction_h);
+    ctx.textAlign = 'left';
+    ctx.fillText(mflText, 10, 90 - obstruction_h);
   }
 
 });
