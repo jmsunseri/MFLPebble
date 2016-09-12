@@ -8,17 +8,16 @@ var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 var mfl = null;
 
-rocky.postMessage({command: 'settings'});
+//rocky.postMessage({command: 'settings'});
 
 
 
 rocky.on('draw', function(drawEvent) {
 	
-	
   var ctx = drawEvent.context;
   var w = ctx.canvas.unobstructedWidth;
-  var h = ctx.canvas.unobstructedHeight;
-  var obstruction_h = (ctx.canvas.clientHeight - ctx.canvas.unobstructedHeight) / 2;
+  //var h = ctx.canvas.unobstructedHeight;
+  //var obstruction_h = (ctx.canvas.clientHeight - ctx.canvas.unobstructedHeight) / 2;
 
   ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
   var d = new Date();
@@ -34,9 +33,9 @@ rocky.on('draw', function(drawEvent) {
 	
   var clockTime = leftpad(hours, 2, 0) + ':' + 
                     leftpad(d.getMinutes(), 2, 0); // TODO: Detect 24h
-  ctx.font = '42px bold numbers Leco-numbers';
+  ctx.font = '32px bold numbers Leco-numbers';
   ctx.textAlign = 'center';
-  ctx.fillText(clockTime, w / 2, 26 - obstruction_h);
+  ctx.fillText(clockTime, w / 2, 0);
 
   // DATE
   ctx.fillStyle = 'lightgray';
@@ -44,7 +43,7 @@ rocky.on('draw', function(drawEvent) {
                     monthNames[d.getMonth()] + ', ' + d.getFullYear();
   ctx.font = '18px bold Gothic';
   ctx.textAlign = 'center';
-  ctx.fillText(clockDate, w / 2, 70 - obstruction_h);
+  ctx.fillText(clockDate, w / 2, 29);
 
   // COLON BLINK MASK
   //if (!(d.getSeconds() % 2)) {
@@ -52,7 +51,7 @@ rocky.on('draw', function(drawEvent) {
   //  ctx.fillRect(66, 72 - obstruction_h, 12, 26);
   //}
 
-  // MFL
+  // MFL	
   if (mfl.length > 0) {
     ctx.fillStyle = 'white';
 		var mflText = '';
@@ -63,18 +62,19 @@ rocky.on('draw', function(drawEvent) {
 		
     ctx.font = '18px bold Gothic';
     ctx.textAlign = 'left';
-    ctx.fillText(mflText, 10, 90 - obstruction_h);
+    ctx.fillText(mflText, 10, 44);
   }
 
 });
 
 rocky.on('message', function(event) {
 	if(event.data.command === 'mfl') {
-    mfl = event.data;
+		
+    mfl = event.data.results;
 		rocky.requestDraw();
   }
 	if(event.data.command === 'settings') {
-    rocky.postMessage({command: 'mfl'});
+   rocky.postMessage({command: 'mfl'});
   }
 });
 
@@ -87,8 +87,8 @@ rocky.on('minutechange', function(e) {
   rocky.postMessage({command: 'mfl'});
 });
 
-rocky.on('hourchange', function(e) {
-  //rocky.postMessage({command: 'weather'});
+rocky.on('daychange', function(e) {
+  rocky.postMessage({command: 'mfl-season'});
 });
 
 

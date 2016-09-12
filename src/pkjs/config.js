@@ -17,7 +17,6 @@ module.exports = [
       {
         "type": "input",
         "messageKey": "LeagueOneNumber",
-        "defaultValue": "",
         "label": "League #",
 				"attributes": {
 					"placeholder": "11902"
@@ -26,7 +25,6 @@ module.exports = [
       {
         "type": "input",
         "messageKey": "LeagueOneFranchiseNumber",
-        "defaultValue": "",
         "label": "Franchise Id",
 				"attributes": {
 					"placeholder": "0008"
@@ -69,7 +67,6 @@ module.exports = [
       {
         "type": "input",
         "messageKey": "LeagueThreeNumber",
-        "defaultValue": "",
         "label": "League #",
 				"attributes": {
 					"placeholder": "11902"
@@ -78,7 +75,6 @@ module.exports = [
       {
         "type": "input",
         "messageKey": "LeagueThreeFranchiseNumber",
-        "defaultValue": "",
         "label": "Franchise Id",
 				"attributes": {
 					"placeholder": "0008"
@@ -96,7 +92,6 @@ module.exports = [
       {
         "type": "input",
         "messageKey": "LeagueFourNumber",
-        "defaultValue": "",
         "label": "League #",
 				"attributes": {
 					"placeholder": "11902"
@@ -105,7 +100,6 @@ module.exports = [
       {
         "type": "input",
         "messageKey": "LeagueFourFranchiseNumber",
-        "defaultValue": "",
         "label": "Franchise Id",
 				"attributes": {
 					"placeholder": "0008"
@@ -123,7 +117,6 @@ module.exports = [
       {
         "type": "input",
         "messageKey": "LeagueFiveNumber",
-        "defaultValue": "",
         "label": "League #",
 				"attributes": {
 					"placeholder": "11902"
@@ -132,7 +125,6 @@ module.exports = [
       {
         "type": "input",
         "messageKey": "LeagueFiveFranchiseNumber",
-        "defaultValue": "",
         "label": "Franchise Id",
 				"attributes": {
 					"placeholder": "0008"
