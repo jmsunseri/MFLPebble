@@ -8,7 +8,7 @@ var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 var mfl = null;
 
-//rocky.postMessage({command: 'settings'});
+//rocky.postMessage({command: 'mfl-season'});
 
 
 
@@ -33,17 +33,17 @@ rocky.on('draw', function(drawEvent) {
 	
   var clockTime = leftpad(hours, 2, 0) + ':' + 
                     leftpad(d.getMinutes(), 2, 0); // TODO: Detect 24h
-  ctx.font = '32px bold numbers Leco-numbers';
+  ctx.font = '28px bold Gothic';
   ctx.textAlign = 'center';
   ctx.fillText(clockTime, w / 2, 0);
 
   // DATE
-  ctx.fillStyle = 'lightgray';
-  var clockDate = dayNames[d.getDay()] + ' ' + d.getDate() + ' ' + 
-                    monthNames[d.getMonth()] + ', ' + d.getFullYear();
-  ctx.font = '18px bold Gothic';
-  ctx.textAlign = 'center';
-  ctx.fillText(clockDate, w / 2, 29);
+//   ctx.fillStyle = 'lightgray';
+//   var clockDate = dayNames[d.getDay()] + ' ' + d.getDate() + ' ' + 
+//                     monthNames[d.getMonth()] + ', ' + d.getFullYear();
+//   ctx.font = '18px bold Gothic';
+//   ctx.textAlign = 'center';
+  //ctx.fillText(clockDate, w / 2, 29);
 
   // COLON BLINK MASK
   //if (!(d.getSeconds() % 2)) {
@@ -54,15 +54,20 @@ rocky.on('draw', function(drawEvent) {
   // MFL	
   if (mfl.length > 0) {
     ctx.fillStyle = 'white';
-		var mflText = '';
+		var mflText = 'Season\n';
 		
 		for(var result in mfl){
-			mflText += 'L:' + mfl[result].league + ' S:' + mfl[result].score + ' R:' + mfl[result].rank + '\n';
+			mflText += '-'+ mfl[result].league + ' #' + mfl[result].seasonRank + ' PD:' + mfl[result].pointDifferential + '\n';
 		}
+		mflText +='This Week\n';
+		for(var result2 in mfl){
+			mflText += '-'+mfl[result2].league + ' #' + mfl[result2].rank + ' S:' + mfl[result2].score + '\n';
+		}
+		
 		
     ctx.font = '18px bold Gothic';
     ctx.textAlign = 'left';
-    ctx.fillText(mflText, 10, 44);
+    ctx.fillText(mflText, 3, 22);
   }
 
 });
@@ -81,10 +86,16 @@ rocky.on('message', function(event) {
 rocky.on('secondchange', function(e) {
   
 });
-
 rocky.on('minutechange', function(e) {
-	//rocky.requestDraw();
-  rocky.postMessage({command: 'mfl'});
+	var d = new Date();
+	
+	if(!(d.getMinutes() % 5) || !mfl ) {
+		rocky.postMessage({command: 'mfl'});
+	}
+	else {
+		rocky.requestDraw();
+	}
+  
 });
 
 rocky.on('daychange', function(e) {

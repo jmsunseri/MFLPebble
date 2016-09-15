@@ -1,9 +1,9 @@
 var results = [];
-var myLeagues = [{ league: '47859', id: '0001' }, { league: '11902', id: '0008' }, { league: '19480', id: '0004' }];
+var myLeagues = [ { league: '11902', id: '0008' }, { league: '19480', id: '0004' }, { league: '47859', id: '0001' }]; // 
 
 var seasonLongResults = [];
 
-var _ = require('underscore');
+var _ = require('../common/underscore');
 
 // var Clay = require('./clay');
 // // Load our Clay configuration file
@@ -76,16 +76,18 @@ Pebble.on('message', function(event) {
 function processMflSeasonResponse(e){
 	if (this.readyState === 4) {
 		if (this.status === 200) {
-			seasonLongResults = [];
 			
-			
+			var rows = [];
 			var response = JSON.parse(this.response);
-			
-			for(var fran in response.liveScoring.franchise ){
-				var franchise = response.liveScoring.franchise[fran];
-				seasonLongResults.push({ id: franchise.id, pf: franchise.pf	});
+			for(var fran in response.leagueStandings.franchise ){
+				var franchise = response.leagueStandings.franchise[fran];
+				rows.push({ id: franchise.id, pf: parseFloat(franchise.pf) });
 			}
-
+			seasonLongResults.push({ league: myLeagues[this.league].league, scores: _.sortBy(rows, 'id') });
+			if(seasonLongResults.length === myLeagues.length)
+			{
+				seasonLongResults = _.sortBy(seasonLongResults, 'league');	
+			}
 		}
 			
 	} else {
@@ -99,20 +101,48 @@ function processMflResponse(e){
 		if (this.status === 200) {
 			var response = JSON.parse(this.response);
 			
-			for(var fran in response.leagueStandings.franchise ){
-				var myFranchise = response.liveScoring.franchise[fran];
-
-				if(myFranchise.id === myLeagues[this.league].id){
+			response.liveScoring.franchise = _.sortBy(response.liveScoring.franchise, 'id');
+			
+			for(var fran in response.liveScoring.franchise ){
+				var franchise = response.liveScoring.franchise[fran];			
+				if(franchise.id === myLeagues[this.league].id){
 					var weeklyRank = 1;
+					var seasonRank = 1;
+					var losingBy = 0;
+					var leadingBy = 1000000;
+										
+					var mySeasonScore = parseFloat(franchise.score) +  seasonLongResults[this.league].scores[fran].pf;
+		
 					for(var otherFranchise in response.liveScoring.franchise){
-						if(parseFloat(response.liveScoring.franchise[otherFranchise].score) > parseFloat(myFranchise.score)){
+											
+						var theirSeasonScore = parseFloat(response.liveScoring.franchise[otherFranchise].score) + 
+							seasonLongResults[this.league].scores[otherFranchise].pf;						
+						
+						if(parseFloat(response.liveScoring.franchise[otherFranchise].score) > parseFloat(franchise.score)){
 							weeklyRank++;
 						}
+						
+						var temp = mySeasonScore  - theirSeasonScore ;
+						
+						if( theirSeasonScore > mySeasonScore){
+							seasonRank++;
+							if(temp < losingBy)
+								losingBy = temp;
+						}
+						else	
+							{							
+								if(temp < leadingBy && temp > 0)
+									leadingBy = temp;
+							}
+						
 					}
 					var data = {
 						league: myLeagues[this.league].league,
-						score: myFranchise.score,
-						rank: weeklyRank
+						score: franchise.score,
+						rank: weeklyRank,
+						seasonRank: seasonRank,
+						seasonScore: mySeasonScore,
+						pointDifferential: (losingBy === 0) ? '+' + leadingBy.toFixed(0) : losingBy.toFixed(0)
 					};
 					results.push(data);
 				}
@@ -125,9 +155,8 @@ function processMflResponse(e){
 	}
 	if(results.length === myLeagues.length)
 		{
-			//console.log('results: ' + JSON.stringify(results));
-			_.sortBy(results, 'league');
-			
+			results = _.sortBy(results, 'league');	
+						
 			Pebble.postMessage({command: 'mfl', results: results});
 		}
 		
@@ -144,11 +173,7 @@ function getMfl() {
 		var req = new XMLHttpRequest();  
 		
 		req.league = i;
-		
-		
-		//console.log('iterator :' + req.league );
-		//console.log('url:' + 'http://www64.myfantasyleague.com/2016/export?TYPE=liveScoring&L='+ myLeagues[req.league].league +'&W=&JSON=1');
-		
+			
   	req.open('GET', 'http://www64.myfantasyleague.com/2016/export?TYPE=liveScoring&L='+ myLeagues[req.league].league +'&W=&JSON=1', true);
   	req.onload = processMflResponse;
   	req.send(null);
@@ -156,14 +181,12 @@ function getMfl() {
 }
 
 function getMflSeasonResults() {
+	seasonLongResults = [];
+	
 	for(var i in myLeagues){	
 		var req = new XMLHttpRequest();  
 		
 		req.league = i;
-		
-		
-		//console.log('iterator :' + req.league );
-		//console.log('url:' + 'http://www64.myfantasyleague.com/2016/export?TYPE=liveScoring&L='+ myLeagues[req.league].league +'&W=&JSON=1');
 		
   	req.open('GET', 'http://www64.myfantasyleague.com/2016/export?TYPE=leagueStandings&L='+ myLeagues[req.league].league +'&W=&JSON=1', true);
   	req.onload = processMflSeasonResponse;
