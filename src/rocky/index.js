@@ -7,8 +7,10 @@ var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 
 var mfl = null;
+var mflText = "";
+var settings = null;
 
-//rocky.postMessage({command: 'mfl-season'});
+rocky.postMessage({command: 'settings'});
 
 
 
@@ -52,34 +54,54 @@ rocky.on('draw', function(drawEvent) {
   //}
 
   // MFL	
-  if (mfl.length > 0) {
+	
+	ctx.fillStyle = 'white';
+	ctx.font = '18px bold Gothic';
+	ctx.textAlign = 'left';
+	
+  if (mfl && mfl.length > 0) {
     ctx.fillStyle = 'white';
-		var mflText = 'Season\n';
+		mflText = 'Season\n';
 		
 		for(var result in mfl){
-			mflText += '-'+ mfl[result].league + ' #' + mfl[result].seasonRank + ' PD:' + mfl[result].pointDifferential + '\n';
+			if(mfl[result].seasonScoreAvailable){
+				mflText += '-'+ mfl[result].league + ' #' + mfl[result].seasonRank + ' PD:' + mfl[result].pointDifferential + '\n';
+			}
+			else {
+				mflText += '-'+ mfl[result].league + ' N/A\n';
+			}
+			
 		}
 		mflText +='This Week\n';
 		for(var result2 in mfl){
 			mflText += '-'+mfl[result2].league + ' #' + mfl[result2].rank + ' S:' + mfl[result2].score + '\n';
 		}
 		
-		
-    ctx.font = '18px bold Gothic';
-    ctx.textAlign = 'left';
-    ctx.fillText(mflText, 3, 22);
+
   }
+  ctx.fillText(mflText, 3, 22);
 
 });
 
 rocky.on('message', function(event) {
-	if(event.data.command === 'mfl') {
+	if(event.data.command === 'mfl') {	
+		if(event.data.results && event.data.results.length > 0)
+		{
+			mfl = event.data.results;
+			rocky.requestDraw();
+		}
+		else {
+			console.log('mfl message received with no contents');
+		}
 		
-    mfl = event.data.results;
-		rocky.requestDraw();
+    
   }
 	if(event.data.command === 'settings') {
-   rocky.postMessage({command: 'mfl'});
+		settings = event.data.settings;
+		
+		console.log('the settings have arrived on the watch: ' + JSON.stringify(settings));
+		
+   	rocky.postMessage({command: 'mfl'});
   }
 });
 
@@ -87,8 +109,7 @@ rocky.on('secondchange', function(e) {
   
 });
 rocky.on('minutechange', function(e) {
-	var d = new Date();
-	
+	var d = new Date();	
 	if(!(d.getMinutes() % 5) || !mfl ) {
 		rocky.postMessage({command: 'mfl'});
 	}

@@ -5,46 +5,73 @@ var seasonLongResults = [];
 
 var _ = require('../common/underscore');
 
-// var Clay = require('./clay');
+var Clay = require('./clay');
 // // Load our Clay configuration file
-// var clayConfig = require('./config');
+var clayConfig = require('./config');
 // Initialize Clay
-// var clay = new Clay(clayConfig, null, { autoHandleEvents: false });
+var clay = new Clay(clayConfig, null, { autoHandleEvents: true });
+
+var getMfl = function() {
+	results = [];
+	
+	for(var i in myLeagues){	
+		var req = new XMLHttpRequest();  
+		
+		req.league = i;
+			
+  	req.open('GET', 'http://www64.myfantasyleague.com/2016/export?TYPE=liveScoring&L='+ myLeagues[req.league].league +'&W=&JSON=1', true);
+  	req.onload = processMflResponse;
+  	req.send(null);
+	}
+};
+
+
+
+
+
 
 Pebble.on('message', function(event) {
   if(event.data.command === 'mfl') {
     getMfl();
   }
-	if(event.data.command === 'mfl-season') {
+	else if(event.data.command === 'mfl-season') {
     getMflSeasonResults();
   }
-// 	else if (event.data.command === 'settings') {
-// 		console.log('restoring settings');
-//     restoreSettings();
-//   }
+	else if (event.data.command === 'settings') {
+		console.log('getting settings');
+    getSettings();
+  }
 });
 
 
 
 // Pebble.addEventListener('showConfiguration', function(e) {
-// 	console.log('opening url');
 //   Pebble.openURL(clay.generateUrl());
 // });
 
-// Pebble.addEventListener('webviewclosed', function(e) {
-// 	console.log('web view closed');
-//   if (e && !e.response) {
-//     console.log('exiting without doing anything!!');
-// 		return;
-//   }
 
-//   // Return settings from Config Page to watch
-//   var settings = clay.getSettings(e.response, false);
 
-// 	console.log('settings: ' + JSON.stringify(settings));
+
+
+
+Pebble.addEventListener('webviewclosed', function(e) {
+	console.log('web view closed');
+  if (e && !e.response) {
+    console.log('exiting without doing anything!!');
+		return;
+  }
+
+	//console.log('raw response: ' + JSON.stringify(e) );
+	
+  // Return settings from Config Page to watch
+//   var settings =  localStorage.getItem('clay-settings'); // clay.getSettings(e.response, false);
+
+// 	console.log('setting settings: ' + JSON.stringify(settings));
+	
+// 	localStorage.setItem('mflSettings', settings);
 	
 	
-//   // Flatten to match localStorage version
+  // Flatten to match localStorage version
 //   var settingsFlat = {};
 //   Object.keys(settings).forEach(function(key) {
 //     if (typeof settings[key] === 'object' && settings[key]) {
@@ -54,21 +81,28 @@ Pebble.on('message', function(event) {
 //     }
 //   });
 	
-// 	//Do processing here to update myLeagues variable
-// 		console.log('settings flat: ' + JSON.stringify(settingsFlat));
+	//Do processing here to update myLeagues variable
+	//console.log('settings flat: ' + JSON.stringify(settingsFlat));
 
-//   Pebble.postMessage({command: 'mfl'});
-// });
+  getMfl();
+});
 
-// function restoreSettings() {
-//   // Restore settings from localStorage and send to watch
-//   var settings = JSON.parse(localStorage.getItem('clay-settings'));
-//   if (settings) {
-// 		//Do processing here to update myLeagues variable
-// 		console.log(JSON.stringify(settings));
-//     Pebble.postMessage({command: 'mfl'});
-//   }
-// }
+function getSettings() {
+  // Restore settings from localStorage and send to watch
+	var settingsString = localStorage.getItem('clay-settings');
+	
+	if(settingsString.length > 2){
+		var settings = JSON.parse(settingsString);
+		if (settings) {
+			//Do processing here to update myLeagues variable
+			console.log('sending settings back to watch: ' + JSON.stringify(settings));
+			Pebble.postMessage({command: 'settings', settings: settings});
+		}
+		else {
+			Pebble.openURL(clay.generateUrl());
+		}
+	}
+}
 
 
 
@@ -111,12 +145,22 @@ function processMflResponse(e){
 					var losingBy = 0;
 					var leadingBy = 1000000;
 										
-					var mySeasonScore = parseFloat(franchise.score) +  seasonLongResults[this.league].scores[fran].pf;
+					var mySeasonScore = 0;
+					var isSeasonScoreAvailable = false;
+					
+					if(seasonLongResults[this.league]){
+						mySeasonScore = parseFloat(franchise.score) +  seasonLongResults[this.league].scores[fran].pf;
+						isSeasonScoreAvailable = true;
+					}
+						
 		
 					for(var otherFranchise in response.liveScoring.franchise){
 											
-						var theirSeasonScore = parseFloat(response.liveScoring.franchise[otherFranchise].score) + 
-							seasonLongResults[this.league].scores[otherFranchise].pf;						
+						var otherFranchiseSeasonScore = 0;
+						if (seasonLongResults[this.league] && seasonLongResults[this.league].scores[otherFranchise])
+							otherFranchiseSeasonScore = seasonLongResults[this.league].scores[otherFranchise].pf;
+						
+						var theirSeasonScore = parseFloat(response.liveScoring.franchise[otherFranchise].score) + otherFranchiseSeasonScore;						
 						
 						if(parseFloat(response.liveScoring.franchise[otherFranchise].score) > parseFloat(franchise.score)){
 							weeklyRank++;
@@ -142,7 +186,8 @@ function processMflResponse(e){
 						rank: weeklyRank,
 						seasonRank: seasonRank,
 						seasonScore: mySeasonScore,
-						pointDifferential: (losingBy === 0) ? '+' + leadingBy.toFixed(0) : losingBy.toFixed(0)
+						pointDifferential: (losingBy === 0) ? '+' + leadingBy.toFixed(0) : losingBy.toFixed(0),
+						seasonScoreAvailable: isSeasonScoreAvailable
 					};
 					results.push(data);
 				}
@@ -164,21 +209,7 @@ function processMflResponse(e){
 
 
 
-function getMfl() {
-	results = [];
-	
-	 
-	
-	for(var i in myLeagues){	
-		var req = new XMLHttpRequest();  
-		
-		req.league = i;
-			
-  	req.open('GET', 'http://www64.myfantasyleague.com/2016/export?TYPE=liveScoring&L='+ myLeagues[req.league].league +'&W=&JSON=1', true);
-  	req.onload = processMflResponse;
-  	req.send(null);
-	}
-}
+
 
 function getMflSeasonResults() {
 	seasonLongResults = [];
