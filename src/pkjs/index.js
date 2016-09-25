@@ -9,7 +9,7 @@ var Clay = require('./clay');
 // // Load our Clay configuration file
 var clayConfig = require('./config');
 // Initialize Clay
-var clay = new Clay(clayConfig, null, { autoHandleEvents: true });
+var clay = new Clay(clayConfig, null, { autoHandleEvents: false });
 
 var getMfl = function() {
 	results = [];
@@ -45,9 +45,9 @@ Pebble.on('message', function(event) {
 
 
 
-// Pebble.addEventListener('showConfiguration', function(e) {
-//   Pebble.openURL(clay.generateUrl());
-// });
+Pebble.addEventListener('showConfiguration', function(e) {
+  Pebble.openURL(clay.generateUrl());
+});
 
 
 
@@ -61,17 +61,17 @@ Pebble.addEventListener('webviewclosed', function(e) {
 		return;
   }
 
-	//console.log('raw response: ' + JSON.stringify(e) );
+	console.log('raw response: ' + JSON.stringify(e) );
 	
-  // Return settings from Config Page to watch
-//   var settings =  localStorage.getItem('clay-settings'); // clay.getSettings(e.response, false);
+  //Return settings from Config Page to watch
+  var settings =  clay.getSettings(e.response, false);
 
-// 	console.log('setting settings: ' + JSON.stringify(settings));
+	console.log('setting settings: ' + JSON.stringify(settings));
 	
-// 	localStorage.setItem('mflSettings', settings);
+	localStorage.setItem('clay-settings', settings);
 	
 	
-  // Flatten to match localStorage version
+  //Flatten to match localStorage version
 //   var settingsFlat = {};
 //   Object.keys(settings).forEach(function(key) {
 //     if (typeof settings[key] === 'object' && settings[key]) {
@@ -98,10 +98,11 @@ function getSettings() {
 			console.log('sending settings back to watch: ' + JSON.stringify(settings));
 			Pebble.postMessage({command: 'settings', settings: settings});
 		}
-		else {
+		
+	}
+	else {
 			Pebble.openURL(clay.generateUrl());
 		}
-	}
 }
 
 
