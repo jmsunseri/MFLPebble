@@ -1,4 +1,31 @@
 module.exports = [
+	{
+    "type": "section",
+    "items": [
+      {
+        "type": "heading",
+        "defaultValue": "User Interface Configuration"
+      },
+      {
+        "type": "toggle",
+        "messageKey": "WhiteOnBlack",
+        "label": "Black Background",
+        "defaultValue": true
+      },
+			{
+        "type": "toggle",
+        "messageKey": "ThisWeekSection",
+        "label": "Include This Week Section?",
+        "defaultValue": true
+      },
+			{
+        "type": "toggle",
+        "messageKey": "SeasonSection",
+        "label": "Include Season Section?",
+        "defaultValue": true
+      }
+    ]
+  },
   {
     "type": "heading",
     "defaultValue": "MFL Configuration"

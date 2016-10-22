@@ -1,11 +1,14 @@
 var rocky = require('rocky');
 
-var mfl = null;
-var mflText = "foo";
+//var mfl = null;
+var mflText = "INITIALIZING....";
 var settings = null;
 
-//rocky.postMessage({command: 'settings'});
+rocky.postMessage({command: 'settings'});
 
+
+//we needed these stupid init variables because the events would fire when the watch face is first loaded.  don't really need to fetch data at this time
+var init = { daychange: true, minutechange: true };
 
 
 rocky.on('draw', function(drawEvent) {
@@ -14,10 +17,25 @@ rocky.on('draw', function(drawEvent) {
 	
   var ctx = drawEvent.context;
   var w = ctx.canvas.unobstructedWidth;
+	
+	var backgroundColor = 'white';
+	var textColor = 'black';
+	
+	if(settings) {
+		backgroundColor = settings.backgroundColor;
+		textColor = settings.textColor;
+	}
+	
+	
 
   ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+	
+	ctx.fillStyle = backgroundColor;
+  ctx.fillRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+	
+	
   var d = new Date();
-  ctx.fillStyle = 'white';
+  ctx.fillStyle = textColor;
 
   // TIME
 	
@@ -35,7 +53,7 @@ rocky.on('draw', function(drawEvent) {
 
   // MFL	
 	
-	ctx.fillStyle = 'white';
+	ctx.fillStyle = textColor;
 	ctx.font = '18px bold Gothic';
 	ctx.textAlign = 'left';
   ctx.fillText(mflText, 3, 22);
@@ -43,58 +61,49 @@ rocky.on('draw', function(drawEvent) {
 });
 
 rocky.on('message', function(event) {
+	console.log('message received: ');
+	
 	if(event.data.command === 'mfl') {	
-		if(event.data.results && event.data.results.length > 0)
-		{
-			mfl = event.data.results;
-			if (mfl && mfl.length > 0) {
-				mflText = 'Season\n';
-				for(var result in mfl){
-					if(mfl[result].seasonScoreAvailable){
-						mflText += '-'+ mfl[result].league + ' #' + mfl[result].seasonRank + ' PD:' + mfl[result].pointDifferential + '\n';
-					}
-					else {
-						mflText += '-'+ mfl[result].league + ' N/A\n';
-					}
-				}
-				mflText +='This Week\n';
-				for(var result2 in mfl){
-					mflText += '-'+mfl[result2].league + ' #' + mfl[result2].rank + ' S:' + mfl[result2].score + '\n';
-				}
-			}
+			//mfl = event.data.results;
+		console.log('watchface text received: '+ event.data.text);
+			
+			mflText = event.data.text;
+			
 			rocky.requestDraw();
-		}
-		else {
-			console.log('mfl message received with no contents');
-		}
   }
 	if(event.data.command === 'settings') {
 		settings = event.data.settings;
 		
 		console.log('the settings have arrived on the watch: ' + JSON.stringify(settings));
-		
-   	rocky.postMessage({command: 'mfl'});
   }
+
 });
 
 rocky.on('secondchange', function(e) {
   
 });
+	
 rocky.on('minutechange', function(e) {
-	var d = new Date();	
-	if(!(d.getMinutes() % 5) || !mfl ) {
-		
-		rocky.postMessage({command: 'mfl'});
+	if (!init.minutechange) {
+		var d = new Date();	
+		if(!(d.getMinutes() % 5) || mflText === '' ) {
+			rocky.postMessage({command: 'mfl'});
+		}
+	} else {
+		init.minutechange = false;
 	}
-	//else {
-		rocky.requestDraw();
-	//}
-  
+	rocky.requestDraw();
 });
 
 rocky.on('daychange', function(e) {
-	console.log('getting season long data');
-  rocky.postMessage({command: 'mfl-season'});
+	console.log('getting season long data due to date change');
+	if (!init.daychange) {
+		rocky.postMessage({command: 'mfl-season'});
+	} else {
+		init.daychange = false;
+	}
+  	
+	
 });
 
 
